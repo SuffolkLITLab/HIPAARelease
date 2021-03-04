@@ -1,0 +1,6 @@
+curl -X POST https://api.telnyx.com/v2/faxes \
+--data-urlencode "media_url=https://drive.google.com/drive/my-driveUsers/mikecarroll/Downloads/Declaration.Mike%20Carroll%20(1).pdf"
+--data-urlencode "connection_id=1232154810234" \
+--data-urlencode "to=+13129457420" \
+--data-urlencode "from=+19459457421" \
+--header "Authorization: Bearer 0KEY0177F9770F9DA6B296C4098DDA8A8B99_EksqAtVPNAEp4XGMflLPuT"
