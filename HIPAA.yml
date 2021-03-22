@@ -35,8 +35,11 @@ code: |
   showed_forms
   client.signature
   if "jdc" in doc_select.true_values():
-    showed_forms_parent
+    showed_forms
     parent.signature
+  fax_recipients
+  got_result
+  all_done
   email_sent_ok
   display_fax_results
 ---
@@ -233,7 +236,6 @@ code: |
     form_to_use_temp.append(DEFHIPAA)
   
   form_to_use = form_to_use_temp
-
 ---
 code: |
   package_filename = space_to_underscore(str(client)+" HIPAA.pdf") 
@@ -253,26 +255,16 @@ content: |
 question: |
   Here are your PDF forms, would you like to send a fax?
 mandatory: True
-fields: 
-  - Who would you like to fax?: fax_recipients
-    datatype: checkboxes
-    choices:
-      - "Hospital 1": Hospital 1
-      - "Hospital 2": Hospital 2
-      - "Hospital 3": Hospital 3
-    none of the above: False
-  - Do you have any comments you'd lie to include with the fax(s)?: fax_comments
-    input type: area
-    required: False
+yesno: fax_recipients
 attachment code: form_to_use
 ---
 variable name: hospitals
 use objects: True
 data:
   Hospital 1:
-    phone_number: 555-555-5555
-    fax_number: 855-656-9829
-    name: "Hospital 1"
+    phone_number:  555-555-5555
+    fax number:  855-656-9829
+    name: "Hospital 3"
   Hospital 2:
     phone_number: 555-555-5555
     fax_number: 855-656-9829
@@ -408,6 +400,20 @@ code: |
     fax_results_temp.append([results,fax_with_cover])
   fax_results = fax_results_temp
 ---
+mandatory: True
+question: |
+  This interview is all done.
+subquestion: |
+  To complete submission, [fax your HIPPA form]to the hospital.
+
+  [fax your HIPPA form]: ${ JDC_HIPAA_Improved.pdf.url_for(temporary=True) }
+attachment:
+  filename: JDC_HIPPA_Improved.pdf
+  name: HIPPA Release Form
+  variable name: JDC_HIPAA_Improved
+  content: |
+    This is your HIPPA Release
+---
 question: |
   These are your fax results!
 subquestion: |
@@ -417,3 +423,44 @@ subquestion: |
   ${ result[1] } | ${ result[0]}
   % endfor
 event: display_fax_results    
+---
+---
+mandatory: True
+code: |
+  hello_world
+  got_result
+  all_done
+---
+objects:
+  - JDC_HIPAA_Improved: DAStaticFile.using(filename="data/templates/JDC_HIPAA_Improved.pdf")       
+---
+objects:
+  - web: DAWeb.using(base_url='https://api.telnyx.com/v2', json_body=False, on_failure='raise')
+---
+question: |
+  Hello World
+continue button field: hello_world
+---
+code: |
+  data = {'media_url': "JDC_HIPAA_Improved.url_for(temporary=True)",
+    'connection_id': '1584353915762115606', 
+    'to': '+14015233148', 
+    'from': '+18332979197'}
+  headers = {'Authorization': 'Bearer KEY0177F9770F9DA6B296C4098DDA8A8B99_EksqAtVPNAEp4XGMflLPuT',
+             'Content-Type': 'application/x-www-form-urlencoded'
+             }
+  try:
+    result = web.post('faxes',
+                      data=data,
+                      headers=headers, 
+                      json_body=False,
+                      )
+  except DAWebError as e:
+    result = e.response_json
+  got_result = True                    
+---
+question: |
+  This is the end screen
+subquestion: |
+  ${ result }
+event: all_done
