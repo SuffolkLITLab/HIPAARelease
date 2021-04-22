@@ -22,20 +22,6 @@ fields:
       - Accelerator to Practice: a2p_student
     none of the above: False
 ---
-initial: True
-code: |
-  if not user_logged_in():
-    require_login_screen
-
-
-  # add user role
-
-  if not user_has_privilege(['clinic', 'admin']):
-    require_login_screen
-  ok_to_finish = True
-# log in sceen
-#  else if
----
 include:
   - docassemble.AssemblyLine:al_package.yml
   - docassemble.MassAccess:massaccess.yml
@@ -240,12 +226,12 @@ fields:
   - Client Birthday: client.dob
     datatype: date
 ---
-mandatory: True
-code: |
-  if user_logged_in():
-    goodbye_page
-  else:
-    sign_in_page
+#mandatory: True
+#code: |
+  #if user_logged_in():
+    #goodbye_page
+  #else:
+    #sign_in_page
 ---
 question: |
   Please sign in
@@ -571,9 +557,6 @@ buttons:
   - Continue using app: what_next
 event: all_done
 ---
-code: |
-  if:
----
 id:  Hospital Information
 question: |
   Hospital Information
@@ -664,3 +647,7 @@ buttons:
   - Fax HIPAA form: use_fax
 event: exit_screen
 ---
+#initial: True
+#code: |
+  #if not user_logged_in():
+    #require_login_screen
